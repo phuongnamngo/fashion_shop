@@ -20,6 +20,7 @@
         input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
         .alert { padding: 10px 12px; border-radius: 6px; margin-bottom: 16px; }
         .alert-success { background: #e7f8ed; border: 1px solid #b6e3c4; }
+        .alert-danger { background: #fdeaea; border: 1px solid #e8a4a4; }
         .error { color: #c62828; font-size: 13px; margin-top: 4px; }
     </style>
 </head>
@@ -33,10 +34,28 @@
                 <button type="submit" class="btn">Logout</button>
             </form>
         </div>
+        <div class="row" style="margin-bottom: 16px; gap: 8px; flex-wrap: wrap;">
+            <a class="btn" href="{{ route('admin.products.index') }}">Products</a>
+            <a class="btn" href="{{ route('admin.categories.index') }}">Categories</a>
+        </div>
     @endauth
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <ul style="margin: 0; padding-left: 1.25rem;">
+                @foreach($errors->all() as $message)
+                    <li>{{ $message }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     @yield('content')

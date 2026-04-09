@@ -38,8 +38,21 @@
 </div>
 
 <div class="form-group">
-    <label for="thumbnail">Thumbnail URL</label>
-    <input id="thumbnail" name="thumbnail" type="text" value="{{ old('thumbnail', $product->thumbnail ?? '') }}" required>
+    <label for="thumbnail">
+        @isset($product)
+            Thumbnail (optional — leave empty to keep current)
+        @else
+            Thumbnail
+        @endisset
+    </label>
+    @isset($product)
+        @if($product->thumbnail)
+            <div style="margin-bottom: 8px;">
+                <img src="{{ \App\Support\ProductMedia::publicUrl($product->thumbnail) }}" alt="" style="max-height: 120px; border-radius: 6px; border: 1px solid #ddd;">
+            </div>
+        @endif
+    @endisset
+    <input id="thumbnail" name="thumbnail" type="file" accept="image/*" @if(! isset($product)) required @endif>
     @error('thumbnail') <div class="error">{{ $message }}</div> @enderror
 </div>
 

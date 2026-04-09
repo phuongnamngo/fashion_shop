@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\ProductMedia;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -35,13 +36,14 @@ class ProductController extends Controller
             'slug' => ['required', 'string', 'max:255', 'unique:products,slug'],
             'description' => ['required', 'string'],
             'base_price' => ['required', 'numeric', 'min:0'],
-            'thumbnail' => ['required', 'string', 'max:255'],
+            'thumbnail' => ['required', 'image', 'max:2048'],
             'status' => ['nullable', 'boolean'],
         ]);
 
+        $validated['thumbnail'] = $request->file('thumbnail')->store('products/thumbnails', 'public');
         $validated['status'] = $request->boolean('status');
 
-        Product::create($validated);
+        Product::query()->create($validated);
 
         return redirect()
             ->route('admin.products.index')
@@ -51,7 +53,7 @@ class ProductController extends Controller
     public function edit(Product $product): View
     {
         $categories = Category::orderBy('name')->get();
-        $product->load('variants');
+        $product->load(['variants', 'images']);
 
         return view('admin.products.edit', compact('product', 'categories'));
     }
@@ -61,12 +63,19 @@ class ProductController extends Controller
         $validated = $request->validate([
             'category_id' => ['required', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:products,slug,' . $product->id],
+            'slug' => ['required', 'string', 'max:255', 'unique:products,slug,'.$product->id],
             'description' => ['required', 'string'],
             'base_price' => ['required', 'numeric', 'min:0'],
-            'thumbnail' => ['required', 'string', 'max:255'],
+            'thumbnail' => ['nullable', 'image', 'max:2048'],
             'status' => ['nullable', 'boolean'],
         ]);
+
+        if ($request->hasFile('thumbnail')) {
+            ProductMedia::deletePublicFileIfManaged($product->thumbnail);
+            $validated['thumbnail'] = $request->file('thumbnail')->store('products/thumbnails', 'public');
+        } else {
+            unset($validated['thumbnail']);
+        }
 
         $validated['status'] = $request->boolean('status');
 
@@ -79,6 +88,14 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
+        $product->load('images');
+
+        foreach ($product->images as $image) {
+            ProductMedia::deletePublicFileIfManaged($image->image_url);
+        }
+
+        ProductMedia::deletePublicFileIfManaged($product->thumbnail);
+
         $product->delete();
 
         return redirect()

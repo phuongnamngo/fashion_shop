@@ -12,6 +12,7 @@
         <thead>
         <tr>
             <th>ID</th>
+            <th>Thumb</th>
             <th>Name</th>
             <th>Category</th>
             <th>Base Price</th>
@@ -24,6 +25,13 @@
         @forelse($products as $product)
             <tr>
                 <td>{{ $product->id }}</td>
+                <td>
+                    @if($product->thumbnail)
+                        <img src="{{ \App\Support\ProductMedia::publicUrl($product->thumbnail) }}" alt="" style="max-height: 40px; border-radius: 4px;">
+                    @else
+                        —
+                    @endif
+                </td>
                 <td>{{ $product->name }}</td>
                 <td>{{ $product->category?->name }}</td>
                 <td>{{ number_format((float) $product->base_price, 2) }}</td>
@@ -42,7 +50,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="7">No products found.</td>
+                <td colspan="8">No products found.</td>
             </tr>
         @endforelse
         </tbody>

@@ -26,3 +26,7 @@ Thumbs.db
 
 openspec/changes/*
 openspec/specs/*
+
+#mempalace
+mempalace.yaml
+entities.json

@@ -8,7 +8,7 @@
         <a class="btn" href="{{ route('admin.products.index') }}">Back</a>
     </div>
 
-    <form method="POST" action="{{ route('admin.products.store') }}">
+    <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
         @include('admin.products._form')
     </form>
 @endsection

@@ -8,9 +8,41 @@
         <a class="btn" href="{{ route('admin.products.index') }}">Back</a>
     </div>
 
-    <form method="POST" action="{{ route('admin.products.update', $product) }}">
+    <form method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data">
         @method('PUT')
         @include('admin.products._form')
+    </form>
+
+    <hr style="margin: 24px 0;">
+
+    <h2>Gallery</h2>
+    @if($product->images->isNotEmpty())
+        <div class="row" style="flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+            @foreach($product->images as $img)
+                <div style="border: 1px solid #ddd; padding: 8px; border-radius: 6px;">
+                    <img src="{{ \App\Support\ProductMedia::publicUrl($img->image_url) }}" alt="" style="max-height: 100px; display: block;">
+                    <form method="POST" action="{{ route('admin.products.images.destroy', [$product, $img]) }}" style="margin-top: 8px;">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-danger" type="submit" onclick="return confirm('Remove this image?')">Remove</button>
+                    </form>
+                </div>
+            @endforeach
+        </div>
+    @else
+        <p>No gallery images yet.</p>
+    @endif
+
+    <h3 style="margin-top: 12px;">Add gallery images</h3>
+    <form method="POST" action="{{ route('admin.products.images.store', $product) }}" enctype="multipart/form-data">
+        @csrf
+        <div class="form-group">
+            <label for="gallery_images">Images (max 10 per upload)</label>
+            <input id="gallery_images" name="images[]" type="file" accept="image/*" multiple required>
+            @error('images') <div class="error">{{ $message }}</div> @enderror
+            @error('images.*') <div class="error">{{ $message }}</div> @enderror
+        </div>
+        <button class="btn btn-primary" type="submit">Upload</button>
     </form>
 
     <hr style="margin: 24px 0;">
